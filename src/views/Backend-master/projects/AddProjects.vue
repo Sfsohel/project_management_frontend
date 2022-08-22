@@ -122,6 +122,11 @@
                                                 </v-text-field>
                                             </v-col>
                                         </v-row>
+                                        <v-row>
+                                            <v-col cols="12" md="2" sm="6">
+                                                <v-btn color="primary" @click="saveDetais">Add Project</v-btn>
+                                            </v-col>
+                                        </v-row>
                                     </v-card-text>
                                 </v-card>
                             </v-col>

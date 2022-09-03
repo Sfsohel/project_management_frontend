@@ -85,9 +85,9 @@ export default {
           text: 'Configuration',
           model: false,
           children: [
-            { icon: 'mdi-swap-vertical-bold', text: 'Priority', route: '/Type' },
-            { icon: 'mdi-google-maps', text: 'Tracker', route: '/Type' },
-            { icon: 'mdi-format-list-checks', text: 'Task Status', route:'/Mark' },
+            { icon: 'mdi-swap-vertical-bold', text: 'Priority', route: '/home/priority'},
+            { icon: 'mdi-google-maps', text: 'Tracker', route: '/home/tracker'},
+            { icon: 'mdi-format-list-checks', text: 'Task Status', route:'/home/task-status'},
           ],
         },
         {

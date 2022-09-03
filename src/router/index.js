@@ -19,6 +19,21 @@ const routes = [
         component: () => import('../views/Backend-master/Dashboard'),
       },
       {
+        path: 'priority',
+        name: 'priority',
+        component: () => import('../views/Backend-master/configuration/Priority'),
+      },
+      {
+        path: 'tracker',
+        name: 'tracker',
+        component: () => import('../views/Backend-master/configuration/Tracker'),
+      },
+      {
+        path: 'task-status',
+        name: 'status',
+        component: () => import('../views/Backend-master/configuration/Status'),
+      },
+      {
         path: 'department',
         name: 'department',
         component: () => import('../views/Backend-master/resources/Department'),

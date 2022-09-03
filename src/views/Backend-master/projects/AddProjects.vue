@@ -62,7 +62,6 @@
                                                 </v-menu>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <!-- <v-text-field v-model="awarded_date" label="Awarded Date"></v-text-field> -->
                                                 <v-menu v-model="awarded_date_menu" :close-on-content-click="false"
                                                     :nudge-right="40" transition="scale-transition" offset-y
                                                     min-width="auto">
@@ -77,7 +76,6 @@
                                                 </v-menu>
                                             </v-col>
                                             <v-col cols="12" sm="6" md="4">
-                                                <!-- <v-text-field v-model="end_date" label="End Date"></v-text-field> -->
                                                 <v-menu v-model="end_date_menu" :close-on-content-click="false"
                                                     :nudge-right="40" transition="scale-transition" offset-y
                                                     min-width="auto">

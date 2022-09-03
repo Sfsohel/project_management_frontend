@@ -41,53 +41,39 @@
                                                                     <v-container>
                                                                         <v-row>
                                                                             <v-col cols="12" md="12">
-                                                                                <v-combobox v-model="editedItem.project"
-                                                                                    :items="['Web development','Android']"
-                                                                                    label="Select Project" multiple
-                                                                                    outlined dense>
+                                                                                <v-combobox
+                                                                                    v-model="editedItem.project"
+                                                                                    :items="projects" item-value="id"
+                                                                                    item-text="name"
+                                                                                    label="Select Project" outlined
+                                                                                    dense>
                                                                                 </v-combobox>
                                                                             </v-col>
-                                                                            <v-col cols="12" md="12">
+                                                                            <!-- <v-col cols="12" md="12">
                                                                                 <v-combobox
                                                                                     v-model="editedItem.parent_module"
                                                                                     :items="['Web development','Android']"
-                                                                                    label="Parent Module" multiple
-                                                                                    outlined dense>
+                                                                                    label="Parent Module" outlined
+                                                                                    dense>
                                                                                 </v-combobox>
-                                                                            </v-col>
+                                                                            </v-col> -->
                                                                             <v-col cols="12" md="12">
                                                                                 <v-text-field v-model="editedItem.name"
                                                                                     label="Moudle name">
                                                                                 </v-text-field>
                                                                             </v-col>
                                                                             <v-col cols="12" md="12">
-                                                                                <v-text-field v-model="editedItem.url"
+                                                                                <v-text-field
+                                                                                    v-model="editedItem.module_url"
                                                                                     label="Moudle url">
                                                                                 </v-text-field>
                                                                             </v-col>
                                                                             <v-col cols="12" md="12">
-                                                                                <v-textarea v-model="editedItem.description"
+                                                                                <v-textarea
+                                                                                    v-model="editedItem.description"
                                                                                     label="Description">
                                                                                 </v-textarea>
                                                                             </v-col>
-                                                                            <!-- <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field
-                                                                                    v-model="editedItem.calories"
-                                                                                    label="Calories"></v-text-field>
-                                                                            </v-col>
-                                                                            <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field v-model="editedItem.fat"
-                                                                                    label="Fat (g)"></v-text-field>
-                                                                            </v-col>
-                                                                            <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field v-model="editedItem.carbs"
-                                                                                    label="Carbs (g)"></v-text-field>
-                                                                            </v-col>
-                                                                            <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field
-                                                                                    v-model="editedItem.protein"
-                                                                                    label="Protein (g)"></v-text-field>
-                                                                            </v-col> -->
                                                                         </v-row>
                                                                     </v-container>
                                                                 </v-card-text>
@@ -145,17 +131,30 @@
     </v-layout>
 </template>
 <script>
+import axios from 'axios'
 export default {
     data: () => ({
         dialog: false,
         dialogDelete: false,
         headers: [
-            { text: 'sl', value: 'serial' },
+            // { text: 'sl', value: 'serial' },
             {
-                text: 'Department Name',
+                text: 'Module Name',
                 align: 'start',
                 sortable: false,
                 value: 'name',
+            },
+            {
+                text: 'Url',
+                align: 'start',
+                sortable: false,
+                value: 'module_url',
+            },
+            {
+                text: 'Project Name',
+                align: 'start',
+                sortable: false,
+                value: 'project.name',
             },
             // { text: 'Fat (g)', value: 'fat' },
             // { text: 'Carbs (g)', value: 'carbs' },
@@ -163,12 +162,13 @@ export default {
             { text: 'Actions', value: 'actions', sortable: false },
         ],
         project_modules: [],
+        projects:[],
         editedIndex: -1,
         editedItem: {
             name: '',
             project:'',
             parent_module:'',
-            url:'',
+            module_url:'',
             description:'',
             // calories: 0,
             // fat: 0,
@@ -179,7 +179,7 @@ export default {
             name: '',
             project:'',
             parent_module:'',
-            url: '',
+            module_url: '',
             description: '',
             // calories: 0,
             // fat: 0,
@@ -208,16 +208,10 @@ export default {
     },
 
     methods: {
-        initialize() {
-            this.project_modules = [
-                {
-                    serial: 159,
-                    name: 'Software',
-                    // fat: 6.0,
-                    // carbs: 24,
-                    // protein: 4.0,
-                },
-            ]
+        async initialize() {
+            let result = await axios.get(`/module`);
+            this.projects = result.data.projects;
+            this.project_modules = result.data.modules;
         },
 
         editItem(item) {
@@ -232,9 +226,12 @@ export default {
             this.dialogDelete = true
         },
 
-        deleteItemConfirm() {
-            this.project_modules.splice(this.editedIndex, 1)
-            this.closeDelete()
+        async deleteItemConfirm() {
+            let result = await axios.delete(`/module/` + this.editedItem.id);
+            if (result.status == 200) {
+                this.project_modules.splice(this.editedIndex, 1)
+                this.closeDelete()
+            }
         },
 
         close() {
@@ -253,11 +250,18 @@ export default {
             })
         },
 
-        save() {
+        async save() {
             if (this.editedIndex > -1) {
-                Object.assign(this.project_modules[this.editedIndex], this.editedItem)
+                let result = await axios.put(`/module/` + this.editedItem.id, { 'name': this.editedItem.name, 'project_id': this.editedItem.project.id, 'module_url': this.editedItem.module_url, 'description': this.editedItem.description });
+                console.log(result);
+                if (result.status == 200) {
+                    Object.assign(this.project_modules[this.editedIndex], this.editedItem)
+                }
             } else {
-                this.project_modules.push(this.editedItem)
+                let result = await axios.post(`/module`, { 'name': this.editedItem.name, 'project_id': this.editedItem.project.id, 'module_url': this.editedItem.module_url, 'description': this.editedItem.description});
+                if (result.status == 200) {
+                    this.project_modules.push(this.editedItem)
+                }
             }
             this.close()
         },

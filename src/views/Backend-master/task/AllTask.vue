@@ -10,7 +10,7 @@
                         <v-toolbar-title>Dashboard</v-toolbar-title>
                     </v-app-bar> -->
                     <v-card-title>
-                        <h2>Tracker</h2>
+                        <h2>Departments</h2>
                     </v-card-title>
                     <v-container>
                         <v-row>
@@ -18,14 +18,14 @@
                                 <v-hover v-slot:default="{ hover }" open-delay="200">
                                     <v-card :elevation="hover ? 16 : 2" class="mx-auto">
                                         <v-card-text>
-                                            <v-data-table :headers="headers" :items="trackers" sort-by="calories"
+                                            <v-data-table :headers="headers" :items="departments" sort-by="calories"
                                                 class="elevation-1">
                                                 <!-- <template v-slot:item="{item, index}">
                                                     {{index +1}}
                                                 </template> -->
                                                 <template v-slot:top>
                                                     <v-toolbar flat>
-                                                        <v-toolbar-title>Manage Tracker</v-toolbar-title>
+                                                        <v-toolbar-title>Manage Departments</v-toolbar-title>
                                                         <v-divider class="mx-4" inset vertical></v-divider>
                                                         <v-spacer></v-spacer>
                                                         <v-dialog v-model="dialog" max-width="500px">
@@ -45,7 +45,7 @@
                                                                         <v-row>
                                                                             <v-col cols="12" md="12">
                                                                                 <v-text-field v-model="editedItem.name"
-                                                                                    label="Tracker name">
+                                                                                    label="Department name">
                                                                                 </v-text-field>
                                                                             </v-col>
                                                                             <!-- <v-col cols="12" sm="6" md="4">
@@ -134,7 +134,7 @@
         //       value: 'index'
         //   },
         {
-          text: 'Tracker Name',
+          text: 'Department Name',
           align: 'start',
           sortable: false,
           value: 'name',
@@ -144,7 +144,7 @@
         // { text: 'Protein (g)', value: 'protein' },
         { text: 'Actions', value: 'actions', sortable: false },
       ],
-      trackers: [],
+      departments: [],
       editedIndex: -1,
       editedItem: {
         name: '',
@@ -167,7 +167,7 @@
             return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
         },
         // itemsWithIndex() {
-        //     return this.trackers.map(
+        //     return this.departments.map(
         //         (items, index) => ({
         //             ...items,
         //             index: index + 1
@@ -195,27 +195,27 @@
 
     methods: {
       async initialize () {
-            let result = await axios.get(`/tracker`);
-            this.trackers = result.data;
+            let result = await axios.get(`/department`);
+            this.departments = result.data;
         },
 
         editItem(item) {
-            this.editedIndex = this.trackers.indexOf(item)
+            this.editedIndex = this.departments.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialog = true
         },
 
         deleteItem(item) {
-            this.editedIndex = this.trackers.indexOf(item)
+            this.editedIndex = this.departments.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialogDelete = true
         },
 
         async deleteItemConfirm() {
-            let result = await axios.delete(`/tracker/` + this.editedItem.id);
+            let result = await axios.delete(`/department/` + this.editedItem.id);
             console.log(result);
             if (result.status == 200) {
-                this.trackers.splice(this.editedIndex, 1)
+                this.departments.splice(this.editedIndex, 1)
                 this.closeDelete()
             }
         },
@@ -238,17 +238,17 @@
 
         async save() {
             if (this.editedIndex > -1) {
-                let result = await axios.put(`/tracker/` + this.editedItem.id,{'name':this.editedItem.name});
+                let result = await axios.put(`/department/` + this.editedItem.id,{'name':this.editedItem.name});
                 console.log(result);
                 if (result.status==200) {
-                    Object.assign(this.trackers[this.editedIndex], this.editedItem)
+                    Object.assign(this.departments[this.editedIndex], this.editedItem)
                 }
                 // console.log(this.editedItem);
             } else {
-                let result = await axios.post(`/tracker`, { 'name': this.editedItem.name });
+                let result = await axios.post(`/department`, { 'name': this.editedItem.name });
                 console.log(result);
                 if (result.status == 200) {
-                    this.trackers.push(this.editedItem)
+                    this.departments.push(this.editedItem)
                 }
                 
             }

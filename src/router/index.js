@@ -78,6 +78,21 @@ const routes = [
         name: 'project-pages',
         component: () => import('../views/Backend-master/projects/ProjectPages'),
       },
+      {
+        path: 'task-create',
+        name: 'task-create',
+        component: () => import('../views/Backend-master/task/Create.vue'),
+      },
+      {
+        path: 'task',
+        name: 'task',
+        component: () => import('../views/Backend-master/task/AllTask.vue'),
+      },
+      {
+        path: 'task-pending',
+        name: 'task-pending',
+        component: () => import('../views/Backend-master/task/PendingTask.vue'),
+      },
     ]
   },
   {

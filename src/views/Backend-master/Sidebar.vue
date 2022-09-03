@@ -124,8 +124,9 @@ export default {
           text: 'Task',
           model: false,
           children: [
-            { icon: 'mdi-list-status', text: 'All Task', route: '/Type' },
-            { icon: 'mdi-view-list', text: 'My Pending Task', route: '/Type' },
+            { icon: 'mdi-list-status', text: 'Create', route: '/home/task-create' },
+            { icon: 'mdi-list-status', text: 'All Task', route: '/home/task' },
+            { icon: 'mdi-view-list', text: 'My Pending Task', route: '/home/task-pending' },
           ],
         },
         { icon: 'mdi-magnify', text: 'Search', route:'/recherches' },

@@ -13,10 +13,10 @@
   },
   "main": "background.js",
   "dependencies": {
-    "@vee-validate/rules": "^4.5.11",
     "axios": "^0.27.2",
     "core-js": "^3.6.5",
-    "vee-validate": "^4.5.11",
+    "moment": "^2.29.4",
+    "tiptap-vuetify": "^2.24.0",
     "vue": "^2.6.11",
     "vue-carousel-3d": "^0.2.0",
     "vue-router": "^3.2.0",

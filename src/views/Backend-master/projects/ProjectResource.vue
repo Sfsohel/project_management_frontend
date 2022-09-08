@@ -40,11 +40,18 @@
                                                                 <v-card-text>
                                                                     <v-container>
                                                                         <v-row>
-                                                                            <v-col cols="12" md="12">
+                                                                            <v-col cols="12" sm="6" md="4">
+                                                                                <v-combobox v-model="editedItem.user"
+                                                                                    :items="users" item-value="id"
+                                                                                    item-text="f_name" label="Resource Name"
+                                                                                    multiple chips>
+                                                                                </v-combobox>
+                                                                            </v-col>
+                                                                            <!-- <v-col cols="12" md="12"> -->
                                                                                 <!-- <v-text-field v-model="editedItem.name"
                                                                                     label="Department name">
                                                                                 </v-text-field> -->
-                                                                                <v-autocomplete v-model="friends"
+                                                                                <!-- <v-autocomplete v-model="friends"
                                                                                     :disabled="isUpdating"
                                                                                     :items="people" filled chips
                                                                                     color="blue-grey lighten-2"
@@ -85,8 +92,8 @@
                                                                                             </v-list-item-content>
                                                                                         </template>
                                                                                     </template>
-                                                                                </v-autocomplete>
-                                                                            </v-col>
+                                                                                </v-autocomplete> -->
+                                                                            <!-- </v-col> -->
                                                                         </v-row>
                                                                     </v-container>
                                                                 </v-card-text>
@@ -118,13 +125,40 @@
                                                         </v-dialog>
                                                     </v-toolbar>
                                                 </template>
+                                                <template v-slot:item.user="{ item }">
+                                                    <br>
+                                                    <v-simple-table>
+                                                        <template v-slot:default>
+                                                        <thead>
+                                                            <tr>
+                                                                <th class="text-center">
+                                                                    Name
+                                                                </th>
+                                                                <th class="text-center">
+                                                                    Skills
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr v-for="(user, index) in item.user" :key="index">
+                                                                <td class="text-center">{{user.f_name }} {{ user.l_name}}</td>
+                                                                <td class="text-center">
+                                                                    <p v-for="(skill, index2) in user.skill" :key="index2">
+                                                                        <span>{{skill.name}}</span>
+                                                                    </p>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                        </template>
+                                                    </v-simple-table><br>
+                                                </template>
                                                 <template v-slot:item.actions="{ item }">
-                                                    <v-icon small class="mr-2" @click="editItem(item)">
-                                                        mdi-pencil
-                                                    </v-icon>
-                                                    <v-icon small @click="deleteItem(item)">
+                                                    <v-btn color="primary" small class="mr-2" @click="editItem(item)">
+                                                        Assign User
+                                                    </v-btn>
+                                                    <!-- <v-icon small @click="deleteItem(item)">
                                                         mdi-delete
-                                                    </v-icon>
+                                                    </v-icon> -->
                                                 </template>
                                                 <template v-slot:no-data>
                                                     <v-btn color="primary" @click="initialize">
@@ -144,46 +178,48 @@
     </v-layout>
 </template>
 <script>
+import axios from 'axios'
 export default {
-    
     data: () => ({
-        autoUpdate: true,
-        friends: ['Sandra Adams', 'Britta Holt'],
-        isUpdating: false,
-        name: 'Midnight Crew',
-        people: [
-            { header: 'Group 1' },
-            { name: 'Sandra Adams', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-            { name: 'Ali Connors', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-            { name: 'Trevor Hansen', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-            { name: 'Tucker Smith', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-            { divider: true },
-            { header: 'Group 2' },
-            { name: 'Britta Holt', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-            { name: 'Jane Smith ', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-            { name: 'John Smith', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-            { name: 'Sandra Williams', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
-        ],
-        title: 'The summer breeze',
+        // autoUpdate: true,
+        // friends: ['Sandra Adams', 'Britta Holt'],
+        // isUpdating: false,
+        // name: 'Midnight Crew',
+        // people: [
+        //     { header: 'Group 1' },
+        //     { name: 'Sandra Adams', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        //     { name: 'Ali Connors', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        //     { name: 'Trevor Hansen', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        //     { name: 'Tucker Smith', group: 'Group 1', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        //     { divider: true },
+        //     { header: 'Group 2' },
+        //     { name: 'Britta Holt', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        //     { name: 'Jane Smith ', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        //     { name: 'John Smith', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        //     { name: 'Sandra Williams', group: 'Group 2', avatar: 'https://cdn.vuetifyjs.com/images/lists/1.jpg' },
+        // ],
+        // title: 'The summer breeze',
         dialog: false,
         dialogDelete: false,
         headers: [
-            { text: 'sl', value: 'serial' },
+            // { text: 'sl', value: 'serial' },
             {
                 text: 'Project Name',
                 align: 'start',
                 sortable: false,
                 value: 'name',
             },
-            // { text: 'Fat (g)', value: 'fat' },
+            { text: 'Resources', value: 'user' },
             // { text: 'Carbs (g)', value: 'carbs' },
             // { text: 'Protein (g)', value: 'protein' },
             { text: 'Actions', value: 'actions', sortable: false },
         ],
         project_resources: [],
+        users:[],
         editedIndex: -1,
         editedItem: {
             name: '',
+            user:[],
             // calories: 0,
             // fat: 0,
             // carbs: 0,
@@ -191,6 +227,7 @@ export default {
         },
         defaultItem: {
             name: '',
+            user:[],
             // calories: 0,
             // fat: 0,
             // carbs: 0,
@@ -205,11 +242,11 @@ export default {
     },
 
     watch: {
-        isUpdating(val) {
-            if (val) {
-                setTimeout(() => (this.isUpdating = false), 3000)
-            }
-        },
+        // isUpdating(val) {
+        //     if (val) {
+        //         setTimeout(() => (this.isUpdating = false), 3000)
+        //     }
+        // },
         dialog(val) {
             val || this.close()
         },
@@ -223,21 +260,24 @@ export default {
     },
 
     methods: {
-        initialize() {
-            this.project_resources = [
-                {
-                    serial: 159,
-                    name: 'Software',
-                    // fat: 6.0,
-                    // carbs: 24,
-                    // protein: 4.0,
-                },
-            ]
+        async initialize() {
+            let result = await axios.get(`/project-resources`);
+            this.project_resources = result.data.projects;
+            this.users = result.data.users;
+            // this.project_resources = [
+            //     {
+            //         serial: 159,
+            //         name: 'Software',
+            //         // fat: 6.0,
+            //         // carbs: 24,
+            //         // protein: 4.0,
+            //     },
+            // ]
         },
-        remove(item) {
-            const index = this.friends.indexOf(item.name)
-            if (index >= 0) this.friends.splice(index, 1)
-        },
+        // remove(item) {
+        //     const index = this.friends.indexOf(item.name)
+        //     if (index >= 0) this.friends.splice(index, 1)
+        // },
 
         editItem(item) {
             this.editedIndex = this.project_resources.indexOf(item)
@@ -272,9 +312,14 @@ export default {
             })
         },
 
-        save() {
+        async save() {
             if (this.editedIndex > -1) {
-                Object.assign(this.project_resources[this.editedIndex], this.editedItem)
+                let result = await axios.put(`/project-resources/`+this.editedItem.id, {'users': this.editedItem.user });
+                if (result.status == 200) {
+                    this.initialize()
+                    Object.assign(this.project_resources[this.editedIndex], this.editedItem)
+                }
+                // Object.assign(this.project_resources[this.editedIndex], this.editedItem)
             } else {
                 this.project_resources.push(this.editedItem)
             }

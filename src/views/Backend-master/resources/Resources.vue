@@ -56,7 +56,7 @@
                                                                                     label="Email">
                                                                                 </v-text-field>
                                                                             </v-col>
-                                                                            <v-col cols="12" sm="6" md="4">
+                                                                            <v-col cols="12" sm="6" md="4" v-if="editedIndex==-1">
                                                                                 <v-text-field
                                                                                     v-model="editedItem.password"
                                                                                     :append-icon="password_show ? 'mdi-eye' : 'mdi-eye-off'"
@@ -81,7 +81,7 @@
                                                                                 </v-select>
                                                                             </v-col>
                                                                             <v-col cols="12" sm="6" md="4">
-                                                                                <v-combobox v-model="editedItem.skills"
+                                                                                <v-combobox v-model="editedItem.skill"
                                                                                     :items="skills" item-value="id"
                                                                                     item-text="name" label="Skills"
                                                                                     multiple chips>
@@ -126,6 +126,11 @@
                                                         mdi-delete
                                                     </v-icon>
                                                 </template>
+                                                <template v-slot:item.skill="{ item }">
+                                                    <ul v-for="(skill, index) in item.skill" :key="index">
+                                                        <li>{{skill.name}}</li>
+                                                    </ul>
+                                                </template>
                                                 <template v-slot:no-data>
                                                     <v-btn color="primary" @click="initialize">
                                                         Reset
@@ -162,7 +167,7 @@ export default {
             { text: 'Email', value: 'email' },
             { text: 'Department', value: 'department.name' },
             { text: 'Designation', value: 'designation.name' },
-            { text: 'Skills', value: 'skills' },
+            { text: 'Skills', value: 'skill' },
             { text: 'Actions', value: 'actions', sortable: false },
         ],
         resources: [],
@@ -177,7 +182,7 @@ export default {
             password:'',
             department:'',
             designation:'',
-            skills:[],
+            skill:[],
         },
         defaultItem: {
             f_name: '',
@@ -186,7 +191,7 @@ export default {
             password:'',
             department:'',
             designation:'',
-            skills:[],
+            skill:[],
         },
     }),
 
@@ -216,18 +221,6 @@ export default {
             this.designations = result.data.designations;
             this.skills = result.data.skills;
             this.resources = result.data.resources
-            // [
-            //     {
-            //         serial: 159,
-            //         f_name: 'Software',
-            //         l_name:'l_name',
-            //         'email':'sfsohel',
-            //         'password': '2345',
-            //         'department': 'foo',
-            //         'designation': 'foo',
-            //         'skills': 'foo',
-            //     },
-            // ]
         },
 
         editItem(item) {
@@ -242,9 +235,13 @@ export default {
             this.dialogDelete = true
         },
 
-        deleteItemConfirm() {
-            this.resources.splice(this.editedIndex, 1)
-            this.closeDelete()
+        async deleteItemConfirm() {
+            let result = await axios.delete(`/resource/` + this.editedItem.id);
+            if (result.status == 200) {
+                this.initialize();
+                this.designations.splice(this.editedIndex, 1)
+                this.closeDelete()
+            }
         },
 
         close() {
@@ -265,9 +262,14 @@ export default {
 
         async save() {
             if (this.editedIndex > -1) {
-                Object.assign(this.resources[this.editedIndex], this.editedItem)
+                let result = await axios.put(`/resource/`+this.editedItem.id, { 'f_name': this.editedItem.f_name, 'l_name': this.editedItem.l_name, 'email': this.editedItem.email,'department_id': this.editedItem.department.id, 'designation_id': this.editedItem.designation.id, 'skills': this.editedItem.skill });
+                if (result.status == 200) {
+                    this.initialize()
+                    Object.assign(this.resources[this.editedIndex], this.editedItem)
+                }
+                // Object.assign(this.resources[this.editedIndex], this.editedItem)
             } else {
-                let result = await axios.post(`/resource`, { 'f_name': this.editedItem.f_name, 'l_name': this.editedItem.l_name, 'email': this.editedItem.email, 'password': this.editedItem.password, 'department_id': this.editedItem.department, 'designation_id': this.editedItem.designation, 'skills': this.editedItem.skills });
+                let result = await axios.post(`/resource`, { 'f_name': this.editedItem.f_name, 'l_name': this.editedItem.l_name, 'email': this.editedItem.email, 'password': this.editedItem.password, 'department_id': this.editedItem.department, 'designation_id': this.editedItem.designation, 'skills': this.editedItem.skill });
                 if (result.status == 200) {
                     this.initialize()
                     this.resources.push(this.editedItem)

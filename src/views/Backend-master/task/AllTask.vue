@@ -131,7 +131,7 @@
                                                             </v-col> -->
                                                             <v-col cols="12"  md="12">
                                                                 <v-select :items="users" item-value="id" item-text="full_name" label="Resource"
-                                                                    v-model="user_id"></v-select>
+                                                                    v-model="user_id" return-object></v-select>
                                                             </v-col>
                                                         </v-row>
                                                     </v-card-text>

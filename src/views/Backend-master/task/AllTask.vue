@@ -10,25 +10,36 @@
                         <v-toolbar-title>Dashboard</v-toolbar-title>
                     </v-app-bar> -->
                     <v-card-title>
-                        <h2>Departments</h2>
+                        <h2>Tasks</h2>
                     </v-card-title>
                     <v-container>
                         <v-row>
+                            <v-col cols="12" sm="6" md="4">
+                                <v-select :items="projects" item-value="id" item-text="name" @change="projectChange" label="Project Name"
+                                    v-model="project_id"></v-select>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                                <v-select :items="modules" item-value="id" item-text="name" @change="getPages" label="Module Name"
+                                    v-model="module_id"></v-select>
+                            </v-col>
+                            <v-col cols="12" sm="6" md="4">
+                                <v-select :items="pages" @change="getTask" item-value="id" item-text="name" label="Page Name"
+                                    v-model="page_id"></v-select>
+                            </v-col>
+                        </v-row>
+                        <v-row v-if="tasks.length > 0">
                             <v-col cols="12" md="12">
                                 <v-hover v-slot:default="{ hover }" open-delay="200">
                                     <v-card :elevation="hover ? 16 : 2" class="mx-auto">
                                         <v-card-text>
-                                            <v-data-table :headers="headers" :items="departments" sort-by="calories"
+                                            <v-data-table :headers="headers" :items="tasks" sort-by="calories"
                                                 class="elevation-1">
-                                                <!-- <template v-slot:item="{item, index}">
-                                                    {{index +1}}
-                                                </template> -->
                                                 <template v-slot:top>
                                                     <v-toolbar flat>
-                                                        <v-toolbar-title>Manage Departments</v-toolbar-title>
+                                                        <v-toolbar-title>Manage Tasks</v-toolbar-title>
                                                         <v-divider class="mx-4" inset vertical></v-divider>
                                                         <v-spacer></v-spacer>
-                                                        <v-dialog v-model="dialog" max-width="500px">
+                                                        <!-- <v-dialog v-model="dialog" max-width="500px">
                                                             <template v-slot:activator="{ on, attrs }">
                                                                 <v-btn color="primary" dark class="mb-2" v-bind="attrs"
                                                                     v-on="on">
@@ -45,27 +56,9 @@
                                                                         <v-row>
                                                                             <v-col cols="12" md="12">
                                                                                 <v-text-field v-model="editedItem.name"
-                                                                                    label="Department name">
+                                                                                    label="Task name">
                                                                                 </v-text-field>
                                                                             </v-col>
-                                                                            <!-- <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field
-                                                                                    v-model="editedItem.calories"
-                                                                                    label="Calories"></v-text-field>
-                                                                            </v-col>
-                                                                            <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field v-model="editedItem.fat"
-                                                                                    label="Fat (g)"></v-text-field>
-                                                                            </v-col>
-                                                                            <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field v-model="editedItem.carbs"
-                                                                                    label="Carbs (g)"></v-text-field>
-                                                                            </v-col>
-                                                                            <v-col cols="12" sm="6" md="4">
-                                                                                <v-text-field
-                                                                                    v-model="editedItem.protein"
-                                                                                    label="Protein (g)"></v-text-field>
-                                                                            </v-col> -->
                                                                         </v-row>
                                                                     </v-container>
                                                                 </v-card-text>
@@ -80,7 +73,7 @@
                                                                     </v-btn>
                                                                 </v-card-actions>
                                                             </v-card>
-                                                        </v-dialog>
+                                                        </v-dialog> -->
                                                         <v-dialog v-model="dialogDelete" max-width="500px">
                                                             <v-card>
                                                                 <v-card-title class="text-h5">Are you sure you want to
@@ -98,12 +91,18 @@
                                                     </v-toolbar>
                                                 </template>
                                                 <template v-slot:item.actions="{ item }">
-                                                    <v-icon small class="mr-2" @click="editItem(item)">
+
+                                                    <v-icon title="Edit" small class="mr-2" @click="editItem(item)">
                                                         mdi-pencil
                                                     </v-icon>
-                                                    <v-icon small @click="deleteItem(item)">
+                                                    <v-icon title="Delete" small @click="deleteItem(item)">
                                                         mdi-delete
                                                     </v-icon>
+                                                    <v-icon title="Publish" v-if="item.is_draft == 0"  @click="activatePublish(item.id)">
+                                                        mdi-publish
+                                                    </v-icon>
+                                                    <v-btn v-else color="purple" small  @click.stop="assigndialog = true">Assign User</v-btn>
+                                                    <!-- <v-btn color="purple" @click="activatePublish(item.id)">Publish</v-btn> -->
                                                 </template>
                                                 <template v-slot:no-data>
                                                     <v-btn color="primary" @click="initialize">
@@ -111,10 +110,60 @@
                                                     </v-btn>
                                                 </template>
                                             </v-data-table>
+                                            <v-dialog
+                                                v-model="assigndialog"
+                                                max-width="290"
+                                            >
+                                                <v-card>
+                                                    <v-card-title class="text-h5">
+                                                        Assign Resource <small>(This resoures are assigned to this project)</small>
+                                                    </v-card-title>
+
+                                                    <v-card-text>
+                                                        <v-row>
+                                                            <!-- <v-col cols="12" sm="6" md="4">
+                                                                <v-select :items="['On Going','Finished']" label="Depatment"
+                                                                    v-model="department_id"></v-select>
+                                                            </v-col>
+                                                            <v-col cols="12" sm="6" md="4">
+                                                                <v-select :items="['On Going','Finished']" label="Designation"
+                                                                    v-model="designation_id"></v-select>
+                                                            </v-col> -->
+                                                            <v-col cols="12"  md="12">
+                                                                <v-select :items="users" item-value="id" item-text="full_name" label="Resource"
+                                                                    v-model="user_id"></v-select>
+                                                            </v-col>
+                                                        </v-row>
+                                                    </v-card-text>
+
+                                                    <v-card-actions>
+                                                        <v-spacer></v-spacer>
+
+                                                        <v-btn
+                                                            color="green darken-1"
+                                                            text
+                                                            @click="dialog = false"
+                                                        >
+                                                            Disagree
+                                                        </v-btn>
+
+                                                        <v-btn
+                                                            color="green darken-1"
+                                                            text
+                                                            @click="dialog = false"
+                                                        >
+                                                            Agree
+                                                        </v-btn>
+                                                    </v-card-actions>
+                                                </v-card>
+                                            </v-dialog>
                                         </v-card-text>
                                     </v-card>
                                 </v-hover>
                             </v-col>
+                        </v-row>
+                        <v-row v-else>
+                            <v-col clos="12" md="12"> <h1 align="center">Please select Project -> Module -> Pages</h1> </v-col>
                         </v-row>
                     </v-container>
                 </v-card>
@@ -126,40 +175,51 @@
     import axios from 'axios'
   export default {
     data: () => ({
-      dialog: false,
-      dialogDelete: false,
-      headers: [
-        //   {
-        //       text: 'Sl.',
-        //       value: 'index'
-        //   },
-        {
-          text: 'Department Name',
-          align: 'start',
-          sortable: false,
-          value: 'name',
+        users:[],
+        user_id:null,
+        assigndialog: false,
+        dialog: false,
+        dialogDelete: false,
+        projects:[],
+        project_id:null,
+        modules:[],
+        module_id:null,
+        pages:[],
+        page_id:null,
+        headers: [
+            //   {
+            //       text: 'Sl.',
+            //       value: 'index'
+            //   },
+            {
+            text: 'Task Name',
+            align: 'start',
+            sortable: false,
+            value: 'name',
+            },
+            { text: 'Priority', value: 'priority' },
+            { text: 'Tracker', value: 'tracker' },
+            { text: 'Status', value: 'status' },
+            { text: 'Exp. Start', value: 'start_date' },
+            { text: 'Exp. End', value: 'end_date' },
+            { text: 'Actions', value: 'actions', sortable: false },
+        ],
+        tasks: [],
+        editedIndex: -1,
+        editedItem: {
+            name: '',
+            // calories: 0,
+            // fat: 0,
+            // carbs: 0,
+            // protein: 0,
         },
-        // { text: 'Fat (g)', value: 'fat' },
-        // { text: 'Carbs (g)', value: 'carbs' },
-        // { text: 'Protein (g)', value: 'protein' },
-        { text: 'Actions', value: 'actions', sortable: false },
-      ],
-      departments: [],
-      editedIndex: -1,
-      editedItem: {
-        name: '',
-        // calories: 0,
-        // fat: 0,
-        // carbs: 0,
-        // protein: 0,
-      },
-      defaultItem: {
-        name: '',
-        // calories: 0,
-        // fat: 0,
-        // carbs: 0,
-        // protein: 0,
-      },
+        defaultItem: {
+            name: '',
+            // calories: 0,
+            // fat: 0,
+            // carbs: 0,
+            // protein: 0,
+        },
     }),
 
     computed: {
@@ -167,7 +227,7 @@
             return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
         },
         // itemsWithIndex() {
-        //     return this.departments.map(
+        //     return this.tasks.map(
         //         (items, index) => ({
         //             ...items,
         //             index: index + 1
@@ -195,18 +255,40 @@
 
     methods: {
       async initialize () {
-            let result = await axios.get(`/department`);
-            this.departments = result.data;
+            let result = await axios.get(`/project`);
+            this.projects = result.data;
         },
 
+        async projectChange(){
+            let result = await axios.get(`/project-resources/`+this.project_id);
+            this.users = result.data.user;
+            let module_result = await axios.get(`/module/`+this.project_id);
+            this.modules = module_result.data;
+        },
+        async getPages(){
+            let result = await axios.get(`/page/`+ this.module_id);
+            this.pages = result.data;
+            // console.log(project_id,module_id);
+            // this.getTask();
+
+        },
+        async getTask(){
+            let result = await axios.get(`/task`,{ params: { project_id: this.project_id,module_id:this.module_id,page_id:this.page_id } });
+            this.tasks = result.data;
+        },
+        async activatePublish(id){
+            let result = await axios.get(`/task-publish/`+ id);
+            this.pages = result.data;
+            this.getTask();
+        },
         editItem(item) {
-            this.editedIndex = this.departments.indexOf(item)
+            this.editedIndex = this.tasks.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialog = true
         },
 
         deleteItem(item) {
-            this.editedIndex = this.departments.indexOf(item)
+            this.editedIndex = this.tasks.indexOf(item)
             this.editedItem = Object.assign({}, item)
             this.dialogDelete = true
         },
@@ -215,7 +297,7 @@
             let result = await axios.delete(`/department/` + this.editedItem.id);
             console.log(result);
             if (result.status == 200) {
-                this.departments.splice(this.editedIndex, 1)
+                this.tasks.splice(this.editedIndex, 1)
                 this.closeDelete()
             }
         },
@@ -241,14 +323,14 @@
                 let result = await axios.put(`/department/` + this.editedItem.id,{'name':this.editedItem.name});
                 console.log(result);
                 if (result.status==200) {
-                    Object.assign(this.departments[this.editedIndex], this.editedItem)
+                    Object.assign(this.tasks[this.editedIndex], this.editedItem)
                 }
                 // console.log(this.editedItem);
             } else {
                 let result = await axios.post(`/department`, { 'name': this.editedItem.name });
                 console.log(result);
                 if (result.status == 200) {
-                    this.departments.push(this.editedItem)
+                    this.tasks.push(this.editedItem)
                 }
                 
             }

@@ -101,7 +101,7 @@
                                                     <v-icon title="Publish" v-if="item.is_draft == 0"  @click="activatePublish(item.id)">
                                                         mdi-publish
                                                     </v-icon>
-                                                    <v-btn v-else color="purple" small  @click.stop="assigndialog = true">Assign User</v-btn>
+                                                    <v-btn v-else color="purple" small  @click.stop="task_id=item.id,assigndialog = true">Assign User</v-btn>
                                                     <!-- <v-btn color="purple" @click="activatePublish(item.id)">Publish</v-btn> -->
                                                 </template>
                                                 <template v-slot:no-data>
@@ -112,7 +112,7 @@
                                             </v-data-table>
                                             <v-dialog
                                                 v-model="assigndialog"
-                                                max-width="290"
+                                                max-width="450"
                                             >
                                                 <v-card>
                                                     <v-card-title class="text-h5">
@@ -130,8 +130,16 @@
                                                                     v-model="designation_id"></v-select>
                                                             </v-col> -->
                                                             <v-col cols="12"  md="12">
-                                                                <v-select :items="users" item-value="id" item-text="full_name" label="Resource"
-                                                                    v-model="user_id" return-object></v-select>
+                                                                <v-combobox :items="users" item-value="id" item-text="full_name" label="Resource"
+                                                                    v-model="selected_user" return-object></v-combobox>
+                                                            </v-col>
+                                                            <v-col cols="12" md="12" v-if="selected_user">
+                                                                <div>
+                                                                    <p><b>Resource Skills</b></p>
+                                                                    <ul>
+                                                                        <li v-for="skill in selected_user.skill" :key="skill.id">{{skill.name}}</li>
+                                                                    </ul>
+                                                                </div>
                                                             </v-col>
                                                         </v-row>
                                                     </v-card-text>
@@ -142,17 +150,17 @@
                                                         <v-btn
                                                             color="green darken-1"
                                                             text
-                                                            @click="dialog = false"
+                                                            @click="assigndialog = false"
                                                         >
-                                                            Disagree
+                                                            Cancel
                                                         </v-btn>
 
                                                         <v-btn
                                                             color="green darken-1"
                                                             text
-                                                            @click="dialog = false"
+                                                            @click="assigndialog = false"
                                                         >
-                                                            Agree
+                                                            Apply
                                                         </v-btn>
                                                     </v-card-actions>
                                                 </v-card>
@@ -176,7 +184,7 @@
   export default {
     data: () => ({
         users:[],
-        user_id:null,
+        selected_user:null,
         assigndialog: false,
         dialog: false,
         dialogDelete: false,
@@ -186,6 +194,7 @@
         module_id:null,
         pages:[],
         page_id:null,
+        task_id:null,
         headers: [
             //   {
             //       text: 'Sl.',

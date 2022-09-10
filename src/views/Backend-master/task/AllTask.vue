@@ -141,6 +141,13 @@
                                                                     </ul>
                                                                 </div>
                                                             </v-col>
+                                                            <v-col cols="12" sm="6" md="12">
+                                                                <tiptap-vuetify
+                                                                    v-model="description"
+                                                                    :extensions="extensions"
+                                                                    placeholder="Description"
+                                                                />
+                                                            </v-col>
                                                         </v-row>
                                                     </v-card-text>
 
@@ -158,7 +165,7 @@
                                                         <v-btn
                                                             color="green darken-1"
                                                             text
-                                                            @click="assigndialog = false"
+                                                            @click="assigndialog = false,assignUser"
                                                         >
                                                             Apply
                                                         </v-btn>
@@ -181,170 +188,203 @@
 </template>
 <script>
     import axios from 'axios'
-  export default {
-    data: () => ({
-        users:[],
-        selected_user:null,
-        assigndialog: false,
-        dialog: false,
-        dialogDelete: false,
-        projects:[],
-        project_id:null,
-        modules:[],
-        module_id:null,
-        pages:[],
-        page_id:null,
-        task_id:null,
-        headers: [
-            //   {
-            //       text: 'Sl.',
-            //       value: 'index'
-            //   },
-            {
-            text: 'Task Name',
-            align: 'start',
-            sortable: false,
-            value: 'name',
+    import { TiptapVuetify, Heading, Bold, Italic, Strike, Underline, Code, Paragraph, BulletList, OrderedList, ListItem, Link, Blockquote, HardBreak, HorizontalRule, History } from 'tiptap-vuetify'
+    export default {
+        components: { TiptapVuetify },
+        data: () => ({
+            users:[],
+            selected_user:null,
+            assigndialog: false,
+            dialog: false,
+            dialogDelete: false,
+            projects:[],
+            project_id:null,
+            modules:[],
+            module_id:null,
+            pages:[],
+            page_id:null,
+            task_id:null,
+            description:null,
+            extensions: [
+                History,
+                Blockquote,
+                Link,
+                Underline,
+                Strike,
+                Italic,
+                ListItem,
+                BulletList,
+                OrderedList,
+                [Heading, {
+                    options: {
+                    levels: [1, 2, 3]
+                    }
+                }],
+                Bold,
+                Code,
+                HorizontalRule,
+                Paragraph,
+                HardBreak
+            ],
+            headers: [
+                //   {
+                //       text: 'Sl.',
+                //       value: 'index'
+                //   },
+                {
+                text: 'Task Name',
+                align: 'start',
+                sortable: false,
+                value: 'name',
+                },
+                { text: 'Priority', value: 'priority' },
+                { text: 'Tracker', value: 'tracker' },
+                { text: 'Status', value: 'status' },
+                { text: 'Exp. Start', value: 'start_date' },
+                { text: 'Exp. End', value: 'end_date' },
+                { text: 'Actions', value: 'actions', sortable: false },
+            ],
+            tasks: [],
+            editedIndex: -1,
+            editedItem: {
+                name: '',
+                // calories: 0,
+                // fat: 0,
+                // carbs: 0,
+                // protein: 0,
             },
-            { text: 'Priority', value: 'priority' },
-            { text: 'Tracker', value: 'tracker' },
-            { text: 'Status', value: 'status' },
-            { text: 'Exp. Start', value: 'start_date' },
-            { text: 'Exp. End', value: 'end_date' },
-            { text: 'Actions', value: 'actions', sortable: false },
-        ],
-        tasks: [],
-        editedIndex: -1,
-        editedItem: {
-            name: '',
-            // calories: 0,
-            // fat: 0,
-            // carbs: 0,
-            // protein: 0,
-        },
-        defaultItem: {
-            name: '',
-            // calories: 0,
-            // fat: 0,
-            // carbs: 0,
-            // protein: 0,
-        },
-    }),
+            defaultItem: {
+                name: '',
+                // calories: 0,
+                // fat: 0,
+                // carbs: 0,
+                // protein: 0,
+            },
+        }),
 
-    computed: {
-        formTitle () {
-            return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+        computed: {
+            formTitle () {
+                return this.editedIndex === -1 ? 'New Item' : 'Edit Item'
+            },
+            // itemsWithIndex() {
+            //     return this.tasks.map(
+            //         (items, index) => ({
+            //             ...items,
+            //             index: index + 1
+            //         }))
+            // }
         },
-        // itemsWithIndex() {
-        //     return this.tasks.map(
-        //         (items, index) => ({
-        //             ...items,
-        //             index: index + 1
-        //         }))
-        // }
-    },
-    mounted() {
-        let user = localStorage.getItem('user');
-        if (!user) {
-            this.$router.push({ name: "Login" });
-        }
-    },
-    watch: {
-      dialog (val) {
-        val || this.close()
-      },
-      dialogDelete (val) {
-        val || this.closeDelete()
-      },
-    },
-
-    created () {
-      this.initialize()
-    },
-
-    methods: {
-      async initialize () {
-            let result = await axios.get(`/project`);
-            this.projects = result.data;
-        },
-
-        async projectChange(){
-            let result = await axios.get(`/project-resources/`+this.project_id);
-            this.users = result.data.user;
-            let module_result = await axios.get(`/module/`+this.project_id);
-            this.modules = module_result.data;
-        },
-        async getPages(){
-            let result = await axios.get(`/page/`+ this.module_id);
-            this.pages = result.data;
-            // console.log(project_id,module_id);
-            // this.getTask();
-
-        },
-        async getTask(){
-            let result = await axios.get(`/task`,{ params: { project_id: this.project_id,module_id:this.module_id,page_id:this.page_id } });
-            this.tasks = result.data;
-        },
-        async activatePublish(id){
-            let result = await axios.get(`/task-publish/`+ id);
-            this.pages = result.data;
-            this.getTask();
-        },
-        editItem(item) {
-            this.editedIndex = this.tasks.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialog = true
-        },
-
-        deleteItem(item) {
-            this.editedIndex = this.tasks.indexOf(item)
-            this.editedItem = Object.assign({}, item)
-            this.dialogDelete = true
-        },
-
-        async deleteItemConfirm() {
-            let result = await axios.delete(`/department/` + this.editedItem.id);
-            console.log(result);
-            if (result.status == 200) {
-                this.tasks.splice(this.editedIndex, 1)
-                this.closeDelete()
+        mounted() {
+            let user = localStorage.getItem('user');
+            if (!user) {
+                this.$router.push({ name: "Login" });
             }
         },
-
-        close() {
-            this.dialog = false
-            this.$nextTick(() => {
-                this.editedItem = Object.assign({}, this.defaultItem)
-                this.editedIndex = -1
-            })
+        watch: {
+        dialog (val) {
+            val || this.close()
+        },
+        dialogDelete (val) {
+            val || this.closeDelete()
+        },
         },
 
-        closeDelete() {
-            this.dialogDelete = false
-            this.$nextTick(() => {
-                this.editedItem = Object.assign({}, this.defaultItem)
-                this.editedIndex = -1
-            })
+        created () {
+        this.initialize()
         },
 
-        async save() {
-            if (this.editedIndex > -1) {
-                let result = await axios.put(`/department/` + this.editedItem.id,{'name':this.editedItem.name});
-                console.log(result);
-                if (result.status==200) {
-                    Object.assign(this.tasks[this.editedIndex], this.editedItem)
+        methods: {
+        async initialize () {
+                let result = await axios.get(`/project`);
+                this.projects = result.data;
+            },
+
+            async projectChange(){
+                let result = await axios.get(`/project-resources/`+this.project_id);
+                this.users = result.data.user;
+                let module_result = await axios.get(`/module/`+this.project_id);
+                this.modules = module_result.data;
+            },
+            async getPages(){
+                let result = await axios.get(`/page/`+ this.module_id);
+                this.pages = result.data;
+                // console.log(project_id,module_id);
+                // this.getTask();
+
+            },
+            async getTask(){
+                let result = await axios.get(`/task`,{ params: { project_id: this.project_id,module_id:this.module_id,page_id:this.page_id } });
+                this.tasks = result.data;
+            },
+            async activatePublish(id){
+                let result = await axios.get(`/task-publish/`+ id);
+                // this.pages = result.data;
+                if (result.data){
+                    this.getTask();   
                 }
-                // console.log(this.editedItem);
-            } else {
-                let result = await axios.post(`/department`, { 'name': this.editedItem.name });
+            },
+            async assignUser(){
+                let result = await axios.post(`/task-assign`,{user_id:this.user.id,task_id:this.task_id});
+                // this.pages = result.data;
+                if (result.data){
+                    this.getTask();   
+                }
+            },
+            editItem(item) {
+                this.editedIndex = this.tasks.indexOf(item)
+                this.editedItem = Object.assign({}, item)
+                this.dialog = true
+            },
+
+            deleteItem(item) {
+                this.editedIndex = this.tasks.indexOf(item)
+                this.editedItem = Object.assign({}, item)
+                this.dialogDelete = true
+            },
+
+            async deleteItemConfirm() {
+                let result = await axios.delete(`/department/` + this.editedItem.id);
                 console.log(result);
                 if (result.status == 200) {
-                    this.tasks.push(this.editedItem)
+                    this.tasks.splice(this.editedIndex, 1)
+                    this.closeDelete()
                 }
-                
-            }
-            this.close()
+            },
+
+            close() {
+                this.dialog = false
+                this.$nextTick(() => {
+                    this.editedItem = Object.assign({}, this.defaultItem)
+                    this.editedIndex = -1
+                })
+            },
+
+            closeDelete() {
+                this.dialogDelete = false
+                this.$nextTick(() => {
+                    this.editedItem = Object.assign({}, this.defaultItem)
+                    this.editedIndex = -1
+                })
+            },
+
+            async save() {
+                if (this.editedIndex > -1) {
+                    let result = await axios.put(`/department/` + this.editedItem.id,{'name':this.editedItem.name});
+                    console.log(result);
+                    if (result.status==200) {
+                        Object.assign(this.tasks[this.editedIndex], this.editedItem)
+                    }
+                    // console.log(this.editedItem);
+                } else {
+                    let result = await axios.post(`/department`, { 'name': this.editedItem.name });
+                    console.log(result);
+                    if (result.status == 200) {
+                        this.tasks.push(this.editedItem)
+                    }
+                    
+                }
+                this.close()
+            },
         },
-    },
-}
+    }
 </script>

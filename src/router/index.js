@@ -93,6 +93,11 @@ const routes = [
         name: 'task-pending',
         component: () => import('../views/Backend-master/task/PendingTask.vue'),
       },
+      {
+        path: 'task-details/:id',
+        name: 'task-details',
+        component: () => import('../views/Backend-master/task/TaskDetails.vue'),
+      },
     ]
   },
   {

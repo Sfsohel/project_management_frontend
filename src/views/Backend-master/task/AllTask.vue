@@ -101,7 +101,7 @@
                                                     <v-icon title="Publish" v-if="item.is_draft == 0"  @click="activatePublish(item.id)">
                                                         mdi-publish
                                                     </v-icon>
-                                                    <v-btn v-else color="purple" small  @click.stop="task_id=item.id,assigndialog = true">Assign User</v-btn>
+                                                    <v-btn v-if="item.is_draft == 1 && item.task_movement.length <= 0" color="purple" small  @click.stop="task_id=item.id,assigndialog = true">Assign User</v-btn>
                                                     <!-- <v-btn color="purple" @click="activatePublish(item.id)">Publish</v-btn> -->
                                                 </template>
                                                 <template v-slot:no-data>
@@ -165,7 +165,7 @@
                                                         <v-btn
                                                             color="green darken-1"
                                                             text
-                                                            @click="assigndialog = false,assignUser"
+                                                            @click="assignUser"
                                                         >
                                                             Apply
                                                         </v-btn>
@@ -324,9 +324,10 @@
                 }
             },
             async assignUser(){
-                let result = await axios.post(`/task-assign`,{user_id:this.user.id,task_id:this.task_id});
+                let result = await axios.post(`/task-assign`,{user_id:this.selected_user.id,task_id:this.task_id,description:this.description});
                 // this.pages = result.data;
                 if (result.data){
+                    this.assigndialog = false;
                     this.getTask();   
                 }
             },

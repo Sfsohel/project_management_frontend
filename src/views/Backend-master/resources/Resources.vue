@@ -70,14 +70,14 @@
                                                                                 <v-select :items="departments"
                                                                                     label="Department" item-value="id"
                                                                                     item-text="name"
-                                                                                    v-model="editedItem.department">
+                                                                                    v-model="editedItem.department_id">
                                                                                 </v-select>
                                                                             </v-col>
                                                                             <v-col cols="12" sm="6" md="4">
                                                                                 <v-select :items="designations"
                                                                                     label="Designation" item-value="id"
                                                                                     item-text="name"
-                                                                                    v-model="editedItem.designation">
+                                                                                    v-model="editedItem.designation_id">
                                                                                 </v-select>
                                                                             </v-col>
                                                                             <v-col cols="12" sm="6" md="4">
@@ -180,8 +180,8 @@ export default {
             l_name:'',
             email:'',
             password:'',
-            department:'',
-            designation:'',
+            department_id:null,
+            designation_id:null,
             skill:[],
         },
         defaultItem: {
@@ -189,8 +189,8 @@ export default {
             l_name:'',
             email:'',
             password:'',
-            department:'',
-            designation:'',
+            department_id:null,
+            designation_id:null,
             skill:[],
         },
     }),
@@ -262,15 +262,15 @@ export default {
 
         async save() {
             if (this.editedIndex > -1) {
-                let result = await axios.put(`/resource/`+this.editedItem.id, { 'f_name': this.editedItem.f_name, 'l_name': this.editedItem.l_name, 'email': this.editedItem.email,'department_id': this.editedItem.department.id, 'designation_id': this.editedItem.designation.id, 'skills': this.editedItem.skill });
+                let result = await axios.put(`/resource/`+this.editedItem.id, { 'f_name': this.editedItem.f_name, 'l_name': this.editedItem.l_name, 'email': this.editedItem.email,'department_id': this.editedItem.department_id, 'designation_id': this.editedItem.designation_id, 'skills': this.editedItem.skill });
                 if (result.status == 200) {
                     this.initialize()
                     Object.assign(this.resources[this.editedIndex], this.editedItem)
                 }
                 // Object.assign(this.resources[this.editedIndex], this.editedItem)
             } else {
-                let result = await axios.post(`/resource`, { 'f_name': this.editedItem.f_name, 'l_name': this.editedItem.l_name, 'email': this.editedItem.email, 'password': this.editedItem.password, 'department_id': this.editedItem.department, 'designation_id': this.editedItem.designation, 'skills': this.editedItem.skill });
-                if (result.status == 200) {
+                let result = await axios.post(`/resource`, { 'f_name': this.editedItem.f_name, 'l_name': this.editedItem.l_name, 'email': this.editedItem.email, 'password': this.editedItem.password, 'department_id': this.editedItem.department_id, 'designation_id': this.editedItem.designation_id, 'skills': this.editedItem.skill });
+                if (result.status == 201) {
                     this.initialize()
                     this.resources.push(this.editedItem)
                 }

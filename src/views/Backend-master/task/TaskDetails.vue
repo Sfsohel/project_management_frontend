@@ -16,19 +16,19 @@
                                                 <v-card>
                                                     <v-card-title>Task Info</v-card-title>
                                                     <v-card-text>
-                                                        <p><b>Issue Number:</b> 111.123.12.123</p>
-                                                        <p><b>Project Name:</b> Task Management</p>
-                                                        <p><b>Module Name:</b>  Reviewer/ Employee</p>
-                                                        <p><b>Page Name:</b> Reviewer Dashboard</p>
-                                                        <p><b>Task Name:</b>Committe তে তোলা file গুলোর আলাদা একটি ট্যাব দরকার।</p>
-                                                        <p><b>Expected Start Date:</b> Task Management</p>
-                                                        <p><b>Expected End Date:</b> Task Management</p>
-                                                        <p><b>Est Hour:</b> Task Management</p>
-                                                        <p><b>Assigned By:</b> Task Management</p>
-                                                        <p><b>Priority:</b> Task Management</p>
-                                                        <p><b>Tracker Type:</b> Task Management</p>
-                                                        <p><b>Task Status:</b> Task Management</p>
-                                                        <p><b>Task Description:</b> Task Management</p>
+                                                        <p><b>Issue Number:</b> {{task.issue_no}}</p>
+                                                        <p><b>Project Name:</b> {{task.project.name}}</p>
+                                                        <p><b>Module Name:</b>  {{task.module.name}}</p>
+                                                        <p><b>Page Name:</b> {{task.page.name}}</p>
+                                                        <p><b>Task Name:</b> {{task.name}}</p>
+                                                        <p><b>Expected Start Date:</b> {{task.start_date}}</p>
+                                                        <p><b>Expected End Date:</b> {{task.end_date}}</p>
+                                                        <p><b>Est Hour:</b> {{task.est_hour}}</p>
+                                                        <p><b>Assigned By:</b> {{task.user.full_name}}</p>
+                                                        <p><b>Priority:</b> {{task.priority}}</p>
+                                                        <p><b>Tracker Type:</b> {{task.tracker}}</p>
+                                                        <p><b>Task Status:</b> {{task.status}}</p>
+                                                        <p><b>Task Description:</b> <div v-html="task.description"></div> </p>
                                                         <p><b>Documents:</b> Task Management</p>
                                                         <p><b>Project Timeline:</b> Task Management</p>
                                                     </v-card-text>
@@ -190,6 +190,7 @@ export default {
         async initialize(){
             let result = await axios.get(`/task/`+this.$route.params.id);
             this.task = result.data;
+            this.slider = this.task.progress;
         },
         start() {
             if(this.running) return;

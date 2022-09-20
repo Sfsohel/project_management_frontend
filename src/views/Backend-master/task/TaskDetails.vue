@@ -28,7 +28,7 @@
                                                         <p><b>Priority:</b> {{task.priority}}</p>
                                                         <p><b>Tracker Type:</b> {{task.tracker}}</p>
                                                         <p><b>Task Status:</b> {{task.status}}</p>
-                                                        <p><b>Task Description:</b> <div v-html="task.description"></div> </p>
+                                                        <!-- <p><b>Task Description:</b> <div v-html="task.description"></div> </p> -->
                                                         <p><b>Documents:</b> Task Management</p>
                                                         <p><b>Project Timeline:</b> Task Management</p>
                                                     </v-card-text>
@@ -68,7 +68,7 @@
                                                             <v-col cols="12" md="4">
                                                                 <v-row>
                                                                     <v-col clos="12" md="4">
-                                                                        <v-btn id="start" @click="start" color="primary">Start</v-btn>
+                                                                        <v-btn id="start" :disabled="started_disable" @click="start" color="primary">Start</v-btn>
                                                                     </v-col>
                                                                     <v-col clos="12" md="4">
                                                                         <!-- <v-btn id="start" @click="start">Start</v-btn> -->
@@ -142,6 +142,7 @@ export default {
         timeStopped: null,
         stoppedDuration: 0,
         started: null,
+        started_disable:false,
         running: false,
         task:null,
         // min: 0,
@@ -193,6 +194,7 @@ export default {
             this.slider = this.task.progress;
         },
         start() {
+            this.started_disable=true;
             if(this.running) return;
             
             if (this.timeBegan === null) {
@@ -206,12 +208,15 @@ export default {
 
             this.started = setInterval(this.clockRunning, 10);	
             this.running = true;
+            // console.log(this.timeBegan);
         },
 
         stop() {
             this.running = false;
             this.timeStopped = new Date();
+            this.started_disable = false;
             clearInterval(this.started);
+            this.reset();
         },
 
         reset() {
